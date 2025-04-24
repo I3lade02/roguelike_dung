@@ -1,0 +1,12 @@
+#Screen settings
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+FPS = 60
+
+#Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GRAY = (50, 50, 50)
+PLAYER_COLOR = (0, 120, 250)
+ENEMY_COLOR = (200, 50, 50)
+

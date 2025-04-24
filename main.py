@@ -27,12 +27,16 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    player.attack(enemies)
 
         #update
         walkable_areas = dungeon.get_walkable_rects()
         player.update(walkable_areas)
         for enemy in enemies:
-            enemy.update(player.rect.center, walkable_areas)
+            if enemy.alive:
+                enemy.update(player.rect.center, walkable_areas)
             
         #draw
         screen.fill(GRAY)
@@ -42,8 +46,10 @@ def main():
             pygame.draw.rect(screen, (40, 40, 40), hall)
         
         player.draw(screen)
+        player.draw_health_bar(screen)
         for enemy in enemies:
-            enemy.draw(screen)
+            if enemy.alive:
+                enemy.draw(screen)
 
         pygame.display.flip()
 

@@ -35,17 +35,13 @@ python main.py
 or just run main.py directly in your IDE
 
 ## 🎯 Controls 
-|-----------------------------------------------|
-|Action       | Key                             |
-|-----------------------------------------------|
-|Move         | Arrow keys                      |
-|-----------------------------------------------|
-|Attack       | Spacebar                        |
-|-----------------------------------------------|
-|Start Game   | Mouse Click on Start Button     |
-|-----------------------------------------------|
-|Restart Game | Any Key on Game Over/Win Screen |
-|-----------------------------------------------|
+
+| Action        | Key                              |
+|---------------|----------------------------------|
+| Move          | Arrow keys                       |
+| Attack        | Spacebar                         |
+| Start Game    | Mouse Click on Start Button      |
+| Restart Game  | Any Key on Game Over/Win Screen  |
 
 🚀 Future Plans
 - Ranged combat (arrows, magic spells)

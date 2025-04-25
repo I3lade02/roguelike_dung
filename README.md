@@ -1,4 +1,4 @@
-# Roguelike Dungeon
+# ⚔️ Roguelike Dungeon 
 
 A 2D top-down dungeon explorer game built with Python and Pygame!  
 Fight your way through procedurally generated dungeons filled with different enemy types.  
@@ -53,6 +53,7 @@ or just run main.py directly in your IDE
 - Save/load runs
 
 🛠 Built With
+
 Python 3
 Pygame
 

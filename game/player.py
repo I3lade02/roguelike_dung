@@ -3,7 +3,7 @@ import time
 from config import PLAYER_COLOR
 
 class Player:
-    def __init__(self, x, y, size=32, speed=5):
+    def __init__(self, x, y, size=32, speed=5.5):
         self.rect = pygame.Rect(x, y, size, size)
         self.speed = speed
         self.attack_cooldown = 0.5

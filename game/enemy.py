@@ -8,13 +8,13 @@ class Enemy:
         
         self.type = enemy_type
         if self.type == "normal":
-            self.speed = 2
+            self.speed = 3
             self.health = 3
         elif self.type == "fast":
-            self.speed = 4
+            self.speed = 5
             self.health = 2
         elif self.type == "tough":
-            self.speed = 1
+            self.speed = 2
             self.health = 6
 
         self.alive = True

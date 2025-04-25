@@ -1,0 +1,10 @@
+------------------------------TODO list-----------------------------------------
+1. Fix minimap --> It's not moving with player, always only on spawnpoint
+2. Add sounds
+3. Add collectibles
+4. Add Waves
+5. Add boss fights
+6. Edit title screen
+7. add sprites for characters
+8. add classes for player characters and specific collectibles for them 
+---------------------------------------------------------------------------------

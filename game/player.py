@@ -21,9 +21,12 @@ class Player:
         if keys[pygame.K_UP]: dy -= self.speed
         if keys[pygame.K_DOWN]: dy += self.speed
 
-        new_rect = self.rect.move(dx, dy)
+        new_rect = self.rect.move(dx, 0)
         if any(new_rect.colliderect(area) for area in walkable_areas):
-            self.rect = new_rect
+            self.rect.x += dx
+        new_rect = self.rect.move(0, dy)
+        if any(new_rect.colliderect(area) for area in walkable_areas):
+            self.rect.y += dy
 
     def attack(self, enemies):
         now = time.time()
@@ -55,5 +58,7 @@ class Player:
         pygame.draw.rect(surface, (100, 0, 0), back_bar)
         pygame.draw.rect(surface, (0, 255, 0), current_bar)
     
-    def draw(self, surface):
-        pygame.draw.rect(surface, PLAYER_COLOR, self.rect)
+    def draw(self, surface, camera_offset=(0, 0)):
+        offset_rect = self.rect.move(-camera_offset[0], -camera_offset[1])
+        pygame.draw.rect(surface, PLAYER_COLOR, offset_rect)
+        

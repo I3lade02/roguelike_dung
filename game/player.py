@@ -10,6 +10,8 @@ class Player:
         self.last_attack = 0
         self.health = 5
         self.max_health = 5
+        self.last_hit_time = 0
+        self.hit_cooldown = 1.0
 
     def update(self, walkable_areas):
         keys = pygame.key.get_pressed()
@@ -34,6 +36,13 @@ class Player:
         for enemy in enemies:
             if enemy.alive and attack_range.colliderect(enemy.rect):
                 enemy.take_damage(1)
+
+    def take_damage(self, amount):
+        now = time.time()
+        if now - self.last_hit_time >= self.hit_cooldown:
+            self.health -= amount
+            self.last_hit_time = now
+            print(f"Player took {amount} damage! Health: {self.health}")
     
     def draw_health_bar(self, surface):
         bar_width = 200

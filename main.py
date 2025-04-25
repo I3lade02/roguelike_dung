@@ -8,6 +8,7 @@ from game.enemy import Enemy
 GAME_TITLE = "title"
 GAME_RUNNING = "running"
 GAME_OVER = "game_over"
+GAME_WIN = "win"
 
 def main():
     pygame.init()
@@ -67,6 +68,9 @@ def main():
             if player.health <= 0:
                 game_state = GAME_OVER
 
+            if all(not enemy.alive for enemy in enemies):
+                game_state = GAME_WIN
+
             screen.fill(GRAY)
             dungeon.draw(screen)
             for enemy in enemies:
@@ -99,6 +103,14 @@ def main():
             font = pygame.font.SysFont(None, 60)
             text = font.render("GAME OVER - Press any key to restart", True, (255, 0, 0))
             screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2))
+
+        elif game_state == GAME_WIN:
+            screen.fill((10, 10, 10))
+            font = pygame.font.SysFont(None, 60)
+            win_text = font.render("YOU WIN", True, (0, 255, 0))
+            prompt = pygame.font.SysFont(None, 40).render("Press any key to play again", True, (180, 180, 180))
+            screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, 200))
+            screen.blit(prompt, (SCREEN_WIDTH // 2 - prompt.get_width() // 2, 280))
 
         pygame.display.flip()
 

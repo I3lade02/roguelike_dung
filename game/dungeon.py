@@ -6,7 +6,7 @@ ROOM_MIN_SIZE = 100
 ROOM_MAX_SIZE = 200
 ROOM_COLOR = (30, 30, 30)
 HALL_COLOR = (40, 40, 40)
-NUM_ROOMS = 6
+NUM_ROOMS = 12
 
 class Room:
     def __init__(self, x, y, w, h):

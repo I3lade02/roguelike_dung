@@ -38,8 +38,11 @@ def main():
                         dungeon = Dungeon()
                         player = Player(*dungeon.rooms[0].center())
                         enemies = []
-                        for room in random.sample(dungeon.rooms[1:], 3):
-                            enemies.append(Enemy(*room.rect.center))
+                        enemy_types = ["normal", "fast", "tough"]
+                        for room in random.sample(dungeon.rooms[1:], min(6, len(dungeon.rooms) - 1)): #number of enemies on game start
+                           x, y = room.rect.center
+                           chosen_type = random.choice(enemy_types)
+                           enemies.append(Enemy(x,y,enemy_type=chosen_type))
                         game_state = GAME_RUNNING
 
             # Running state input
@@ -54,8 +57,11 @@ def main():
                     dungeon = Dungeon()
                     player = Player(*dungeon.rooms[0].center())
                     enemies = []
-                    for room in random.sample(dungeon.rooms[1:], 6): #6 is number of enemies
-                        enemies.append(Enemy(*room.rect.center))
+                    enemy_types = ["normal", "fast", "tough"]
+                    for room in random.sample(dungeon.rooms[1:], min(6, len(dungeon.rooms) - 1)): #6 is number of enemies
+                        x,y = room.rect.center
+                        chosen_type = random.choice(enemy_types)
+                        enemies.append(Enemy(x, y, enemy_type=chosen_type))
                     game_state = GAME_RUNNING
 
         # GAME RUNNING LOGIC
@@ -88,7 +94,31 @@ def main():
             player.draw(screen, camera_offset)
             player.draw_health_bar(screen)
 
-        # TITLE SCREEN
+        #Minimap
+            minimap_scale = 0.15
+            minimap_width = int(1920 * minimap_scale)
+            minimap_height = int(1080 * minimap_scale)
+            minimap_surface = pygame.Surface((minimap_width, minimap_height))
+            minimap_surface.fill((20, 20, 20))
+
+            for room in dungeon.rooms:
+                scaled_rect = pygame.Rect(
+                    int(room.rect.x * minimap_scale),
+                    int(room.rect.y * minimap_scale),
+                    int(room.rect.width * minimap_scale),
+                    int(room.rect.height * minimap_scale)
+                )
+                pygame.draw.rect(minimap_surface, (80, 80, 80), scaled_rect)
+
+            player_dot = pygame.Rect(
+                int(player.rect.centerx * minimap_scale) - 2,
+                int(player.rect.centery * minimap_scale) - 2,
+                4, 4
+            )
+            pygame.draw.rect(minimap_surface, (0, 255, 0), player_dot)
+
+            screen.blit(minimap_surface, (SCREEN_WIDTH - minimap_width - 10, 10))
+
         elif game_state == GAME_TITLE:
             screen.fill((10, 10, 10))
             font = pygame.font.SysFont(None, 72)

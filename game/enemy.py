@@ -1,13 +1,22 @@
 import pygame
 import time
-
-ENEMY_COLOR = (200, 50, 50)
+from config import ENEMY_COLOR, FAST_ENEMY_COLOR, TOUGH_ENEMY_COLOR
 
 class Enemy:
-    def __init__(self, x, y, size=28, speed=2, health=3):
+    def __init__(self, x, y, size=28, speed=2, health=3, enemy_type="normal"):
         self.rect = pygame.Rect(x, y, size, size)
-        self.speed = speed
-        self.health = health
+        
+        self.type = enemy_type
+        if self.type == "normal":
+            self.speed = 2
+            self.health = 3
+        elif self.type == "fast":
+            self.speed = 4
+            self.health = 2
+        elif self.type == "tough":
+            self.speed = 1
+            self.health = 6
+
         self.alive = True
         self.hit_flash_duration = 0.2
         self.last_hit_time = 0
@@ -38,13 +47,21 @@ class Enemy:
 
     def draw(self, surface, camera_offset=(0, 0)):
         current_time = time.time()
-        color = (255, 0, 0) if current_time - self.last_hit_time < self.hit_flash_duration else ENEMY_COLOR
+       
+        if self.type == "normal":
+            base_color = ENEMY_COLOR
+        elif self.type == "fast":
+            base_color = FAST_ENEMY_COLOR
+        elif self.type == "tough":
+            base_color = TOUGH_ENEMY_COLOR
+
+        color = (255, 0, 0) if current_time - self.last_hit_time < self.hit_flash_duration else base_color
         offset_rect = self.rect.move(-camera_offset[0], -camera_offset[1])
         pygame.draw.rect(surface, color, offset_rect)
 
         bar_width = self.rect.width
         bar_height = 5
-        health_ratio = max(self.health / 3, 0)
+        health_ratio = max(self.health / 6, 0) if self.type == "tough" else max (self.health / 3, 0)
         bar_x = self.rect.x - camera_offset[0]
         bar_y = self.rect.y - bar_height - 2 - camera_offset[1]
         health_bar = pygame.Rect(bar_x, bar_y, int(bar_width * health_ratio), bar_height)

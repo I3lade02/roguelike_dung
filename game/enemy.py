@@ -1,6 +1,8 @@
 import pygame
 import time
+import random
 from config import ENEMY_COLOR, FAST_ENEMY_COLOR, TOUGH_ENEMY_COLOR
+from game.loot import Loot
 
 class Enemy:
     def __init__(self, x, y, size=28, speed=2, health=3, enemy_type="normal"):
@@ -44,6 +46,9 @@ class Enemy:
         self.last_hit_time = time.time()
         if self.health <= 0:
             self.alive = False
+            if random.random() < 0.3:  # 30% chance to drop loot
+                return Loot(self.rect.centerx, self.rect.centery)
+        return None
 
     def draw(self, surface, camera_offset=(0, 0)):
         current_time = time.time()

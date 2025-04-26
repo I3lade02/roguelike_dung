@@ -5,6 +5,7 @@ from game.player import Player, Projectile
 from game.dungeon import Dungeon
 from game.enemy import Enemy
 from game.loot import Loot
+from game.boss import Boss
 
 # Game states
 GAME_TITLE = "title"
@@ -29,6 +30,7 @@ def main():
     enemies = []
     loot_drops = []
     projectiles = []
+    boss = None
     wave_number = 1
     selected_class = "knight"
 
@@ -59,6 +61,7 @@ def main():
                     enemies = []
                     loot_drops = []
                     projectiles = []
+                    boss = None
                     enemy_types = ["normal", "fast", "tough"]
                     for room in random.sample(dungeon.rooms[1:], min(3 + wave_number, len(dungeon.rooms) - 1)):
                         x, y = room.rect.center
@@ -71,6 +74,10 @@ def main():
                     if event.key == pygame.K_SPACE:
                         if player.class_type == "knight":
                             player.attack(enemies, projectiles, direction=None)
+                            if boss and boss.alive:
+                                attack_range = player.rect.inflate(40, 40)
+                                if attack_range.colliderect(boss.rect):
+                                    boss.take_damage(1)
                         else:
                             keys = pygame.key.get_pressed()
                             direction = None
@@ -89,6 +96,7 @@ def main():
         if game_state == GAME_RUNNING:
             walkable_areas = dungeon.get_walkable_rects()
             player.update(walkable_areas)
+
             for enemy in enemies:
                 if enemy.alive:
                     enemy.update(player.rect.center, walkable_areas)
@@ -108,20 +116,32 @@ def main():
                         enemy.take_damage(projectile.damage)
                         projectiles.remove(projectile)
                         break
+                if boss and boss.alive and projectile.rect.colliderect(boss.rect):
+                    boss.take_damage(projectile.damage)
+                    projectiles.remove(projectile)
+
+            if boss and boss.alive:
+                boss.update(player.rect.center, walkable_areas)
+                if boss.rect.colliderect(player.rect):
+                    player.take_damage(2)
 
             if player.health <= 0:
                 game_state = GAME_OVER
 
-            if all(not enemy.alive for enemy in enemies):
+            if all(not enemy.alive for enemy in enemies) and (not boss or not boss.alive):
                 wave_number += 1
-                enemies = []
                 loot_drops = []
                 projectiles = []
-                enemy_types = ["normal", "fast", "tough"]
-                for room in random.sample(dungeon.rooms[1:], min(3 + wave_number, len(dungeon.rooms) - 1)):
-                    x, y = room.rect.center
-                    chosen_type = random.choice(enemy_types)
-                    enemies.append(Enemy(x, y, enemy_type=chosen_type))
+                if wave_number % 5 == 0:
+                    boss = Boss(*dungeon.rooms[1].center)
+                    enemies = []
+                else:
+                    enemies = []
+                    enemy_types = ["normal", "fast", "tough"]
+                    for room in random.sample(dungeon.rooms[1:], min(3 + wave_number, len(dungeon.rooms) - 1)):
+                        x, y = room.rect.center
+                        chosen_type = random.choice(enemy_types)
+                        enemies.append(Enemy(x, y, enemy_type=chosen_type))
 
             camera_x = player.rect.centerx - SCREEN_WIDTH // 2
             camera_y = player.rect.centery - SCREEN_HEIGHT // 2
@@ -132,6 +152,8 @@ def main():
             for enemy in enemies:
                 if enemy.alive:
                     enemy.draw(screen, camera_offset)
+            if boss and boss.alive:
+                boss.draw(screen, camera_offset)
             for loot in loot_drops:
                 if not loot.collected:
                     loot.draw(screen, camera_offset)

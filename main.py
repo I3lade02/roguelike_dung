@@ -6,6 +6,7 @@ from game.dungeon import Dungeon
 from game.enemy import Enemy
 from game.loot import Loot
 from game.boss import Boss
+from game.particle import Particle
 
 # Game states
 GAME_TITLE = "title"
@@ -21,15 +22,16 @@ def main():
 
     game_state = GAME_TITLE
     start_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, 300, 200, 60)
-    knight_button = pygame.Rect(SCREEN_WIDTH // 2 - 150, 250, 100, 50)
-    ranger_button = pygame.Rect(SCREEN_WIDTH // 2 - 50, 250, 100, 50)
-    wizard_button = pygame.Rect(SCREEN_WIDTH // 2 + 50, 250, 100, 50)
+    knight_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, 220, 200, 50)
+    ranger_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, 290, 200, 50)
+    wizard_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, 360, 200, 50)
 
     dungeon = None
     player = None
     enemies = []
     loot_drops = []
     projectiles = []
+    particles = []
     boss = None
     wave_number = 1
     selected_class = "knight"
@@ -61,6 +63,7 @@ def main():
                     enemies = []
                     loot_drops = []
                     projectiles = []
+                    particles = []
                     boss = None
                     enemy_types = ["normal", "fast", "tough"]
                     for room in random.sample(dungeon.rooms[1:], min(3 + wave_number, len(dungeon.rooms) - 1)):
@@ -115,15 +118,25 @@ def main():
                     if enemy.alive and projectile.rect.colliderect(enemy.rect):
                         enemy.take_damage(projectile.damage)
                         projectiles.remove(projectile)
+                        for _ in range(10):
+                            particles.append(Particle(enemy.rect.centerx, enemy.rect.centery, (200, 50, 50), size=5))
                         break
                 if boss and boss.alive and projectile.rect.colliderect(boss.rect):
                     boss.take_damage(projectile.damage)
                     projectiles.remove(projectile)
+                    for _ in range(20):
+                        particles.append(Particle(boss.rect.centerx, boss.rect.centery, (255, 100, 0), size=7))
 
             if boss and boss.alive:
                 boss.update(player.rect.center, walkable_areas)
                 if boss.rect.colliderect(player.rect):
                     player.take_damage(2)
+
+            # Update particles
+            for particle in particles[:]:
+                particle.update()
+                if particle.lifetime <= 0:
+                    particles.remove(particle)
 
             if player.health <= 0:
                 game_state = GAME_OVER
@@ -132,8 +145,9 @@ def main():
                 wave_number += 1
                 loot_drops = []
                 projectiles = []
+                particles = []
                 if wave_number % 5 == 0:
-                    boss = Boss(*dungeon.rooms[1].center)
+                    boss = Boss(*dungeon.rooms[1].center())
                     enemies = []
                 else:
                     enemies = []
@@ -159,6 +173,8 @@ def main():
                     loot.draw(screen, camera_offset)
             for projectile in projectiles:
                 projectile.draw(screen, camera_offset)
+            for particle in particles:
+                particle.draw(screen, camera_offset)
             player.draw(screen, camera_offset)
             player.draw_health_bar(screen)
 
@@ -216,11 +232,18 @@ def main():
             title_text = font.render("Choose Your Class", True, (255, 255, 255))
             screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, 100))
 
-            pygame.draw.rect(screen, (100, 100, 255), knight_button)
-            pygame.draw.rect(screen, (100, 255, 100), ranger_button)
-            pygame.draw.rect(screen, (255, 100, 100), wizard_button)
+            mouse_pos = pygame.mouse.get_pos()
 
-            font_small = pygame.font.SysFont(None, 30)
+            knight_color = (140, 140, 255) if knight_button.collidepoint(mouse_pos) else (100, 100, 255)
+            ranger_color = (140, 255, 140) if ranger_button.collidepoint(mouse_pos) else (100, 255, 100)
+            wizard_color = (255, 140, 140) if wizard_button.collidepoint(mouse_pos) else (255, 100, 100)
+
+            pygame.draw.rect(screen, knight_color, knight_button, border_radius=12)
+            pygame.draw.rect(screen, ranger_color, ranger_button, border_radius=12)
+            pygame.draw.rect(screen, wizard_color, wizard_button, border_radius=12)
+
+            font_small = pygame.font.SysFont(None, 40)
+
             knight_text = font_small.render("Knight", True, (0, 0, 0))
             ranger_text = font_small.render("Ranger", True, (0, 0, 0))
             wizard_text = font_small.render("Wizard", True, (0, 0, 0))

@@ -126,14 +126,19 @@ def main():
                     if enemy.alive and projectile.rect.colliderect(enemy.rect):
                         enemy.take_damage(projectile.damage)
                         projectiles.remove(projectile)
+
+                        if not enemy.alive:
+                            if random.random() < 0.2:  # 20% chance to drop loot
+                                loot_drops.append(Loot(enemy.rect.centerx, enemy.rect.centery, loot_type="health"))
+
                         for _ in range(10):
                             particles.append(Particle(enemy.rect.centerx, enemy.rect.centery, (200, 50, 50), size=5))
                         break
-                if boss and boss.alive and projectile.rect.colliderect(boss.rect):
-                    boss.take_damage(projectile.damage)
-                    projectiles.remove(projectile)
-                    for _ in range(20):
-                        particles.append(Particle(boss.rect.centerx, boss.rect.centery, (255, 100, 0), size=7))
+                    if boss and boss.alive and projectile.rect.colliderect(boss.rect):
+                        boss.take_damage(projectile.damage)
+                        projectiles.remove(projectile)
+                        for _ in range(20):
+                            particles.append(Particle(boss.rect.centerx, boss.rect.centery, (255, 100, 0), size=7))
 
             if boss and boss.alive:
                 boss.update(player.rect.center, walkable_areas)

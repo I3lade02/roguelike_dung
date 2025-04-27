@@ -7,6 +7,7 @@ from game.enemy import Enemy
 from game.loot import Loot
 from game.boss import Boss
 from game.particle import Particle
+from game.trap import Trap
 
 # Game states
 GAME_TITLE = "title"
@@ -20,6 +21,8 @@ def main():
     pygame.display.set_caption("ROGUELIKE DUNG")
     clock = pygame.time.Clock()
 
+    darkness_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+
     game_state = GAME_TITLE
     start_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, 300, 200, 60)
     knight_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, 220, 200, 50)
@@ -32,6 +35,7 @@ def main():
     loot_drops = []
     projectiles = []
     particles = []
+    traps = []
     boss = None
     wave_number = 1
     selected_class = "knight"
@@ -64,12 +68,16 @@ def main():
                     loot_drops = []
                     projectiles = []
                     particles = []
+                    traps = []
                     boss = None
                     enemy_types = ["normal", "fast", "tough"]
                     for room in random.sample(dungeon.rooms[1:], min(3 + wave_number, len(dungeon.rooms) - 1)):
                         x, y = room.rect.center
                         chosen_type = random.choice(enemy_types)
                         enemies.append(Enemy(x, y, enemy_type=chosen_type))
+                    for room in dungeon.rooms[1:]:
+                        if random.random() < 0.2:
+                            traps.append(Trap(room.rect.centerx - 20, room.rect.centery - 20))
                     game_state = GAME_RUNNING
 
             elif game_state == GAME_RUNNING:
@@ -132,7 +140,12 @@ def main():
                 if boss.rect.colliderect(player.rect):
                     player.take_damage(2)
 
-            # Update particles
+            for trap in traps[:]:
+                if player.rect.colliderect(trap.rect):
+                    player.take_damage(3)
+                    traps.remove(trap)
+                    break
+
             for particle in particles[:]:
                 particle.update()
                 if particle.lifetime <= 0:
@@ -143,9 +156,12 @@ def main():
 
             if all(not enemy.alive for enemy in enemies) and (not boss or not boss.alive):
                 wave_number += 1
+                dungeon = Dungeon()
+                player.rect.center = dungeon.rooms[0].center()
                 loot_drops = []
                 projectiles = []
                 particles = []
+                traps = []
                 if wave_number % 5 == 0:
                     boss = Boss(*dungeon.rooms[1].center())
                     enemies = []
@@ -156,6 +172,9 @@ def main():
                         x, y = room.rect.center
                         chosen_type = random.choice(enemy_types)
                         enemies.append(Enemy(x, y, enemy_type=chosen_type))
+                for room in dungeon.rooms[1:]:
+                    if random.random() < 0.2:
+                        traps.append(Trap(room.rect.centerx - 20, room.rect.centery - 20))
 
             camera_x = player.rect.centerx - SCREEN_WIDTH // 2
             camera_y = player.rect.centery - SCREEN_HEIGHT // 2
@@ -163,6 +182,7 @@ def main():
 
             screen.fill(GRAY)
             dungeon.draw(screen, camera_offset)
+
             for enemy in enemies:
                 if enemy.alive:
                     enemy.draw(screen, camera_offset)
@@ -173,9 +193,19 @@ def main():
                     loot.draw(screen, camera_offset)
             for projectile in projectiles:
                 projectile.draw(screen, camera_offset)
+            for trap in traps:
+                trap.draw(screen, camera_offset)
             for particle in particles:
                 particle.draw(screen, camera_offset)
+
             player.draw(screen, camera_offset)
+
+            # DARKNESS EFFECT BEFORE HUD
+            darkness_surface.fill((0, 0, 0, 220))
+            light_radius = 250
+            pygame.draw.circle(darkness_surface, (0, 0, 0, 0), (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), light_radius)
+            screen.blit(darkness_surface, (0, 0))
+
             player.draw_health_bar(screen)
 
             font = pygame.font.SysFont(None, 36)
